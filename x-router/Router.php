@@ -1,17 +1,20 @@
 <?php
 
-/** User: Dev Lee ... */
+/**
+ * User: Dev_Lee
+ * Date: 6/29/2023
+ * Time: 6:00 AM
+ */
 
-namespace app\router;
-
-use app\router\RouterException;
+namespace Devlee\XRouter;
 
 /**
- * Class Router
- * 
- * @author Ankain Lesly <leeleslyank@gmail.com>
- * @package app\router
+ * Class BaseModel
+ *
+ * @author  Ankain Lesly <leeleslyank@gmail.com>
+ * @package  Devlee\XRouter\Router
  */
+
 class Router
 {
   // public static string $ROOT_DIR;

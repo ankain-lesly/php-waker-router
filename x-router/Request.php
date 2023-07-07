@@ -1,14 +1,18 @@
 <?php
 
-/** User: Dev Lee ... */
+/**
+ * User: Dev_Lee
+ * Date: 6/29/2023
+ * Time: 6:00 AM
+ */
 
-namespace app\router;
+namespace Devlee\XRouter;
 
 /**
- * Class Router
- * 
- * @author Ankain Lesly <leeleslyank@gmail.com>
- * @package app\core
+ * Class BaseModel
+ *
+ * @author  Ankain Lesly <leeleslyank@gmail.com>
+ * @package  Devlee\XRouter\Request
  */
 
 class Request
