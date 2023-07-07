@@ -4,33 +4,31 @@
 
 Create a Fast, secure, efficient and support multiple and amazing features PHP routing package
 
-- validate
-- findOne => ['attribute' => 'value];
-- sessions => Flash Messages
-- Protected Routes
-- MiddelWares
-- Exceptions => Global Exception Class
-
 - Router
 
   - route pages
   - Protected Routes
   - get paramenters POST | GET
 
-- Options
-
-  - Validation
-  - Sessions
-  - Middlewares
-  - Exception Handling
-
 - Request
 
-  - route | path
+  - path
+  - body
   - method
-  - get data -> GET | POST
+  - Data -> GET | POST | JSON
 
 - Response
+
   - set status code
-  - render content -> view | data | text | Json
+  - render content
+    - views
+    - content
+    - Json
+    - and more
+  - redirect
   -
+
+- Extended Features
+  - Middlewares
+  - Protected Routed -> user models
+  - Sessions => Flash Messages
