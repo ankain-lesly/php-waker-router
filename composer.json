@@ -1,0 +1,19 @@
+{
+  "name": "devlee/x-router",
+  "description": "Create a Fast, secure, efficient and support multiple and amazing features PHP routing package",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Devlee\\XRouter\\": "x-router/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Ankain Lesly",
+      "email": "leeleslyank@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {}
+}
