@@ -8,6 +8,8 @@
 
 namespace Devlee\PHPRouter;
 
+use Devlee\PHPRouter\Exceptions\RouterException;
+
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
  * @package  Devlee\PHPRouter\handleErrors

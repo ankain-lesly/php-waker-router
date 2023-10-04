@@ -6,14 +6,20 @@
  * Updated: 10/03/2023 - Time: 9:30 PM
  */
 
-namespace Devlee\PHPRouter;
+
+namespace Devlee\PHPRouter\Exceptions;
+
+interface CustomException
+{
+  public function getTitle();
+}
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\handleErrors
+ * @package  Devlee\PHPRouter\Exceptions\RouterException
  */
 
-class handleErrors
+class RouterException extends \Exception implements CustomException
 {
   private const VALIDATION_ERROR = 400;
   private const UNAUTHORIZED = 401;
@@ -22,9 +28,25 @@ class handleErrors
   private const SERVER_ERROR = 500;
   private const ROUTER_DIR_ERROR = 444;
 
-  public static function createExceptionError(\Throwable $e)
+  protected $message;
+  protected $code;
+  protected $title;
+
+  public function __construct(string $message, int $code = 500)
   {
-    $statusObject = array(
+    $this->message = $message;
+    $this->code = $code;
+    $this->title = self::getErrorTitle($code);
+    HandleErrors::DisplayErrorMessage($this);
+  }
+
+  public function getTitle()
+  {
+    return $this->title;
+  }
+  public static function getErrorTitle($code)
+  {
+    $statusObjectErrors = array(
       self::VALIDATION_ERROR => [
         "code" => self::VALIDATION_ERROR,
         "title" => "Validation Failed",
@@ -35,7 +57,8 @@ class handleErrors
       ],
       self::NOT_FOUND => [
         "code" => self::NOT_FOUND,
-        "title" => "Not Found",
+        // "title" => "Resource Not Found",
+        "title" => "Error Getting View File",
       ],
       self::FORBIDDEN => [
         "code" => self::FORBIDDEN,
@@ -51,21 +74,6 @@ class handleErrors
       ],
     );
 
-    if (array_key_exists($e->getCode(), $statusObject)) {
-      $stack = $statusObject[$e->getCode()];
-      return self::sendErrorMessage($stack['title'], $e);
-    }
-
-    $title = "Unknown Request";
-    return self::sendErrorMessage($title, $e);
-  }
-
-  private static function sendErrorMessage($title, $e)
-  {
-    $message = "<b>$title: </b>";
-    $message .= $e->getMessage();
-
-    echo ($message);
-    exit;
+    return $statusObjectErrors[$code]['title'] ?? "Unknown Request";
   }
 }
