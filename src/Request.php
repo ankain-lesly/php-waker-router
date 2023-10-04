@@ -15,9 +15,9 @@ namespace Devlee\PHPRouter;
 
 class Request
 {
-  private array $body = [];
-  private array $query = [];
-  private array $params = [];
+  private array $bodyData = [];
+  private array $queryData = [];
+  private array $paramsData = [];
   public string $ROOT_DIR;
 
   public function __construct(string $root_dir)
@@ -71,20 +71,20 @@ class Request
   public function setParams($params = [])
   {
     foreach ($params as $key => $value) {
-      $this->params[$key] = $this->sanitizeParams($value);
+      $this->paramsData[$key] = $this->sanitizeParams($value);
     }
   }
   public function params(string $key = null)
   {
-    if ($key) return  $this->params[$key] ?? false;
-    return  $this->params;
+    if ($key) return  $this->paramsData[$key] ?? false;
+    return  $this->paramsData;
   }
   //  BODY DATA
   public function setBody($params = null)
   {
     if ($params) {
       foreach ($params as $key => $value) {
-        $this->body[$key] = $this->sanitizeParams($value);
+        $this->bodyData[$key] = $this->sanitizeParams($value);
       }
     }
   }
@@ -92,12 +92,12 @@ class Request
   public function query(string $param_key = null)
   {
     foreach ($_GET as $key => $value) {
-      $this->query[$key] = $this->sanitizeParams($value);
+      $this->queryData[$key] = $this->sanitizeParams($value);
     }
 
-    if ($param_key) return $this->query[$param_key] ?? false;
+    if ($param_key) return $this->queryData[$param_key] ?? false;
 
-    return $this->query;
+    return $this->queryData;
   }
   // Get POST or Request BODY
   public function body(string $param_key = null)
@@ -107,19 +107,19 @@ class Request
 
     if ($data) {
       foreach ($data as $key => $value) {
-        $this->body[$key] = $this->sanitizeParams($value);
+        $this->bodyData[$key] = $this->sanitizeParams($value);
       }
     }
 
     if ($this->isPost()) {
       foreach ($_POST as $key => $value) {
-        $this->body[$key] = $this->sanitizeParams($value);
+        $this->bodyData[$key] = $this->sanitizeParams($value);
       }
     }
 
-    if ($param_key) return $this->body[$param_key] ?? false;
+    if ($param_key) return $this->bodyData[$param_key] ?? false;
 
-    return $this->body;
+    return $this->bodyData;
   }
 
   private function sanitizeParams(string $value)
