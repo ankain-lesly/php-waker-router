@@ -34,9 +34,9 @@ class Router
   }
 
   // Router config setup
-  public function setLayout(string $layout_dir)
+  public static function setLayout(string $layout_dir)
   {
-    return $this->response::$LAYOUT_MAIN = $layout_dir;
+    return self::$router->response::$LAYOUT_MAIN = $layout_dir;
   }
   public function config(string $views_folder, string $main_layout, string $not_found_page)
   {
@@ -63,17 +63,49 @@ class Router
 
   public function post($path, $handler)
   {
-    $this->routes['post'][$path] = $handler;
+    //finding if there is any {?} parameter in $path
+    preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
+
+    if (empty($paramMatchesKeys[0])) {
+      return $this->routes['post'][$path] = $handler;
+    }
+
+    $response = $this->getQueryParams($path, $paramMatchesKeys[0]);
+
+    if ($response) {
+      $this->routes['post'][$response] = $handler;
+    }
+  }
+  public function both($path, $handler)
+  {
+    //finding if there is any {?} parameter in $path
+    preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
+
+    if (empty($paramMatchesKeys[0])) {
+      $this->routes['get'][$path] = $handler;
+      return $this->routes['post'][$path] = $handler;
+    }
+
+    $response = $this->getQueryParams($path, $paramMatchesKeys[0]);
+
+    if ($response) {
+      $this->routes['get'][$response] = $handler;
+      $this->routes['post'][$response] = $handler;
+    }
   }
 
-  private function getQueryParams($path, $paramKey)
-  {
+  private function getQueryParams(
+    $path,
+    $paramKey
+  ) {
     $uri = $this->request->path();
     $params = [];
 
     //exploding path and request uri string to array
     $path = explode("/", $path);
     $reqUri = explode("/", $uri);
+
+    if (count($path) !== count($reqUri)) return false;
 
     //will store index number where {?} parameter is required in the $path 
     $indexNum = [];
@@ -86,7 +118,7 @@ class Router
         continue;
       }
 
-      if ($path[$index] !== $reqUri[$index]) return implode('/', $path);
+      if ($path[$index] !== $reqUri[$index]) return false;
     }
 
     //running for each loop to set the exact index number with reg expression
@@ -127,9 +159,9 @@ class Router
 
       if (str_contains($handler, '@')) {
         $handler = str_replace('@', '', $handler);
-        return $response->render($handler);
+        return $response->content($handler);
       }
-      return $response->content($handler);
+      return $response->render($handler);
     }
 
     # Array Handler
@@ -143,24 +175,30 @@ class Router
 
   public function interceptRequest($path = null)
   {
-    $server_root = $_SERVER['DOCUMENT_ROOT'];
-    $uri = $path ?? $this->request->path();
+    $server_root = str_replace('\\', "/", strtolower($_SERVER['DOCUMENT_ROOT']));
+    $app_root = str_replace('\\', "/", strtolower(self::$ROOT_DIR));
 
-    if (!str_contains($uri, '_/')) return;
+    $route = str_replace($server_root, '', $app_root);
 
-    $uri = explode('_/', $uri);
-    $uri = '/' . end($uri);
+    $path = $path ?? $this->request->path();
 
-    $app_root = str_replace('\\', "/", self::$ROOT_DIR);
-    $server_root = str_replace('\\', "/", $server_root);
-    $root = str_replace($server_root, '', $app_root);
+    if (!str_contains($path, '_/')) return;
+    $path = explode('_/', $path);
+    $path = '/' . end($path);
 
-    $this->response->redirect($root . $uri, 200);
+    $route = $route . $path;
+    $this->response->redirect($route, 200);
   }
 
   // Get Response
   public function getResponse()
   {
     return $this->response;
+  }
+
+  // FILE PATH
+  public static function root_folder()
+  {
+    return self::$ROOT_DIR;
   }
 }
