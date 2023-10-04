@@ -45,26 +45,25 @@ class Router
     self::$NOT_FOUND = $not_found_page;
   }
 
-  public function get($path, $callback)
+  public function get($path, $handler)
   {
     //finding if there is any {?} parameter in $path
     preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
 
     if (empty($paramMatchesKeys[0])) {
-      return $this->routes['get'][$path] = $callback;
+      return $this->routes['get'][$path] = $handler;
     }
 
     $response = $this->getQueryParams($path, $paramMatchesKeys[0]);
 
     if ($response) {
-      $this->routes['get'][$response] = $callback;
-      // $this->request->setBody($response['params']);
+      $this->routes['get'][$response] = $handler;
     }
   }
 
-  public function post($path, $callback)
+  public function post($path, $handler)
   {
-    $this->routes['post'][$path] = $callback;
+    $this->routes['post'][$path] = $handler;
   }
 
   private function getQueryParams($path, $paramKey)
@@ -110,12 +109,10 @@ class Router
     $response = $this->response;
     $path = $this->request->path();
     $method = $this->request->method();
-    $callback = $this->routes[$method][$path] ?? false;
-    // try {
-    //Undefined Page Handler
+    $handler = $this->routes[$method][$path] ?? false;
 
-    if ($callback === false) {
-      if ($path !== "/404") return $this->interceptRequest("_/404?resource=$path");
+    # Undefined Page Handler
+    if ($handler === false) {
 
       if (self::$NOT_FOUND) {
         $response
@@ -125,23 +122,23 @@ class Router
       throw new RouterException('Oops! The page you are trying to access is not available.', 404);
     }
 
-    //String Handler
-    if (is_string($callback)) {
+    # String Handler
+    if (is_string($handler)) {
 
-      if (str_contains($callback, '@')) {
-        $callback = str_replace('@', '', $callback);
-        return $response->render($callback);
+      if (str_contains($handler, '@')) {
+        $handler = str_replace('@', '', $handler);
+        return $response->render($handler);
       }
-      return $response->content($callback);
+      return $response->content($handler);
     }
 
-    //Array Handler
-    if (is_array($callback)) {
-      $callback[0] = new $callback[0]();
-      // Application::$app->setController($callback[0]);
+    # Array Handler
+    if (is_array($handler)) {
+      $handler[0] = new $handler[0]();
     }
-
-    call_user_func($callback, $this->request, $response);
+    # Reset Routes Object
+    $this->routes = [];
+    call_user_func($handler, $this->request, $response);
   }
 
   public function interceptRequest($path = null)
