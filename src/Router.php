@@ -2,17 +2,15 @@
 
 /**
  * User: Dev_Lee
- * Date: 6/29/2023
- * Time: 6:00 AM
+ * Date: 06/29/2023 - Time: 6:00 AM
+ * Updated: 10/03/2023 - Time: 9:30 PM
  */
 
-namespace Devlee\XRouter;
+namespace Devlee\PHPRouter;
 
 /**
- * Class BaseModel
- *
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\XRouter\Router
+ * @package  Devlee\PHPRouter\handleErrors
  */
 
 class Router

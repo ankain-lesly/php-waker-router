@@ -5,7 +5,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Devlee\\PHP-Router\\": "src/"
+      "Devlee\\PHPRouter\\": "src/"
     }
   },
   "authors": [
