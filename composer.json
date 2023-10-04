@@ -1,11 +1,11 @@
 {
-  "name": "devlee/x-router",
+  "name": "devlee/php-router",
   "description": "Create a Fast, secure, efficient and support multiple and amazing features PHP routing package",
   "type": "library",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Devlee\\XRouter\\": "x-router/"
+      "Devlee\\PHP-Router\\": "src/"
     }
   },
   "authors": [

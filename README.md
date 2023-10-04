@@ -12,7 +12,8 @@ Create a Fast, secure, efficient and support multiple and amazing features PHP r
 
 - Request
 
-  - path
+  - query
+  - params
   - body
   - method
   - Data -> GET | POST | JSON
