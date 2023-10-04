@@ -16,12 +16,19 @@ namespace Devlee\PHPRouter;
 class Request
 {
   private array $body = [];
-  private array $query_params = [];
+  private array $query = [];
+  private array $params = [];
   public string $ROOT_DIR;
 
   public function __construct(string $root_dir)
   {
     $this->ROOT_DIR = $root_dir;
+  }
+
+  // HAndler MEthods
+  public function uri()
+  {
+    return $_SERVER['REQUEST_URI'] ?? '/';
   }
   public function path()
   {
@@ -64,13 +71,13 @@ class Request
   public function setParams($params = [])
   {
     foreach ($params as $key => $value) {
-      $this->query_params[$key] = $this->sanitizeParams($value);
+      $this->params[$key] = $this->sanitizeParams($value);
     }
   }
   public function params(string $key = null)
   {
-    if ($key) return  $this->query_params[$key] ?? false;
-    return  $this->query_params;
+    if ($key) return  $this->params[$key] ?? false;
+    return  $this->params;
   }
   //  BODY DATA
   public function setBody($params = null)
@@ -81,6 +88,18 @@ class Request
       }
     }
   }
+  // Get GET or Request PARAMS
+  public function query(string $param_key = null)
+  {
+    foreach ($_GET as $key => $value) {
+      $this->query[$key] = $this->sanitizeParams($value);
+    }
+
+    if ($param_key) return $this->query[$param_key] ?? false;
+
+    return $this->query;
+  }
+  // Get POST or Request BODY
   public function body(string $param_key = null)
   {
     // Converts Raw Data into a PHP object
@@ -88,12 +107,6 @@ class Request
 
     if ($data) {
       foreach ($data as $key => $value) {
-        $this->body[$key] = $this->sanitizeParams($value);
-      }
-    }
-
-    if ($this->isGet()) {
-      foreach ($_GET as $key => $value) {
         $this->body[$key] = $this->sanitizeParams($value);
       }
     }
@@ -117,9 +130,4 @@ class Request
     $value = trim($value);
     return $value;
   }
-
-  // private function headers(string $value) {
-
-  // }
-
 }
