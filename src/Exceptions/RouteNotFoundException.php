@@ -4,10 +4,12 @@
  * User: Dev_Lee
  * Date: 06/29/2023 - Time: 6:00 AM
  * Updated: 10/03/2023 - Time: 9:30 PM
+ * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-
 namespace Devlee\PHPRouter\Exceptions;
+
+use Devlee\PHPRouter\Router;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
@@ -21,11 +23,9 @@ class RouteNotFoundException extends BaseException
 
     parent::__construct('This page is not available', 404);
 
-    echo '<pre>';
-    print_r($this);
-    echo '</br>';
-    echo '</pre>';
-    exit();
+    if ($view) {
+      Router::$router->getResponse()->render($view);
+    }
     HandleErrors::DisplayErrorMessage($this);
   }
 }

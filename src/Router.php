@@ -4,6 +4,7 @@
  * User: Dev_Lee
  * Date: 06/29/2023 - Time: 6:00 AM
  * Updated: 10/03/2023 - Time: 9:30 PM
+ * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
 namespace Devlee\PHPRouter;
@@ -31,12 +32,8 @@ class Router implements RouterInterface
   public const METHOD_PATCH = 'PATCH';
   public const METHOD_DELETE = 'DELETE';
   public const METHOD_OPTIONS = 'OPTIONS';
-
   /**
-   * Unimplemented requests methods
-   * 
    * @property
-   * 
    */
   public const METHOD_PURGE = 'PURGE';
   public const METHOD_HEAD = 'HEAD';
@@ -50,6 +47,7 @@ class Router implements RouterInterface
    */
   protected Response $response;
   protected Request $request;
+  protected View $view;
 
 
   private array $routes;
@@ -58,29 +56,33 @@ class Router implements RouterInterface
 
   public static Router $router;
 
+  /**
+   * @param string $root_directory: main app directory
+   */
   public function __construct($root_directory)
   {
     $this->request = new Request($root_directory);
-    $this->response = new Response($root_directory);
+    $this->view = new View($root_directory);
+    $this->response = new Response($this->view);
+
     self::$ROOT_DIR = $root_directory;
     self::$router = $this;
   }
-
 
   /**
    * Set page layout for view content
    * 
    * @method SetLayout
    */
-  public static function setLayout(string $layout_dir)
+  public static function setLayout(string $layout_directory)
   {
-    return self::$router->response::$LAYOUT_MAIN = $layout_dir;
+    return self::$router->view::$LAYOUT_DIR = $layout_directory;
   }
-  public function config(string $views_folder, string $main_layout, string $not_found_page)
+  public function config(string $views_folder, string $main_layout, string $not_found_view)
   {
-    $this->response::$VIEWS_MAIN = $views_folder;
-    $this->response::$LAYOUT_MAIN = $main_layout;
-    View::$NOT_FOUND = $not_found_page;
+    $this->view::$VIEWS_DIR = $views_folder;
+    $this->view::$LAYOUT_DIR = $main_layout;
+    $this->view::$NOT_FOUND_VIEW = $not_found_view;
   }
 
   /**
@@ -91,15 +93,16 @@ class Router implements RouterInterface
   {
     /**
      * Searching for URI parameter >>> {param_name} in $path
+     * @var $paramMatchKeys
      * 
      */
 
-    preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
+    preg_match_all("/(?<={).+?(?=})/", $path, $match);
 
-    if (empty($paramMatchesKeys[0])) {
+    if (empty($match[0])) {
       $this->routes[$method][$path] = $handler;
     } else {
-      $path = $this->routeParamsFactory($path, $paramMatchesKeys[0]);
+      $path = $this->routeParamsFactory($path, $match[0]);
 
       if ($path) {
         $this->routes[$method][$path] = $handler;
@@ -107,41 +110,78 @@ class Router implements RouterInterface
     }
   }
 
+  /**
+   * @method get
+   */
   public function get(string $path, $handler): void
   {
     $this->registerRoute(self::METHOD_GET, $path, $handler);
   }
 
+  /**
+   * @method post
+   */
   public function post(string $path, $handler): void
   {
+    $this->registerRoute(self::METHOD_POST, $path, $handler);
   }
+  /**
+   * @method both
+   */
   public function both(string $path, $handler): void
   {
+    $this->registerRoute(self::METHOD_POST, $path, $handler);
+    $this->registerRoute(self::METHOD_GET, $path, $handler);
   }
+  /**
+   * @method delete
+   */
   public function delete(string $path, $handler): void
   {
+    $this->registerRoute(self::METHOD_DELETE, $path, $handler);
   }
+  /**
+   * @method put
+   */
   public function put(string $path, $handler): void
   {
+    $this->registerRoute(self::METHOD_PUT, $path, $handler);
   }
+  /**
+   * @method patch
+   */
   public function patch(string $path, $handler): void
   {
+    $this->registerRoute(self::METHOD_PATCH, $path, $handler);
   }
 
+  /**
+   * Register Custom router
+   * @param callable[]  customRoutes
+   */
+  public function useRoutes(array $customRoutes): void
+  {
+    foreach ($customRoutes as $route) {
+      if (is_callable($route)) {
+        $route($this);
+      }
+    }
+  }
+  /**
+   * @method Resolve Routes
+   */
   public function resolve(): void
   {
-    echo '<pre>';
-    print_r($this->routes);
-    echo '</br>';
-    echo '</pre>';
-    exit();
     $path = $this->request->path();
     $method = $this->request->method();
     $handler = $this->routes[$method][$path] ?? false;
 
+    echo '</br>';
+    // echo '</pre>';
+
     # Undefined Page Handler
     if ($handler === false) {
-      throw new RouteNotFoundException(View::$NOT_FOUND);
+      throw new RouteNotFoundException(View::$NOT_FOUND_VIEW);
     }
 
     # String Handler
@@ -162,18 +202,19 @@ class Router implements RouterInterface
       if (class_exists($class)) {
         $class = new $class();
         if (method_exists($class, $method)) {
-
           # Reset Routes Object
-          call_user_func($handler, $this->request, $this->response);
+          call_user_func([$class, $method], $this->request, $this->response);
+          exit;
         }
       }
     }
 
     # Callable Handler
     if (is_callable($handler)) {
-      call_user_func([$handler], $this->request, $this->response);
+      call_user_func($handler, $this->request, $this->response);
+      exit;
     }
-    throw new RouteNotFoundException(View::$NOT_FOUND);
+    throw new RouteNotFoundException(View::$NOT_FOUND_VIEW);
   }
 
   /**

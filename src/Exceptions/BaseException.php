@@ -4,7 +4,9 @@
  * User: Dev_Lee
  * Date: 06/29/2023 - Time: 6:00 AM
  * Updated: 10/03/2023 - Time: 9:30 PM
+ * Updated: 10/06/2023 - Time: 10:00 AM
  */
+
 
 namespace Devlee\PHPRouter\Exceptions;
 
@@ -42,12 +44,12 @@ abstract class BaseException extends \Exception
       ],
       self::ROUTER_DIR_ERROR => [
         "code" => self::ROUTER_DIR_ERROR,
-        "title" => "Error Getting View File",
+        "title" => "Error Getting File",
       ],
       self::NOT_FOUND => [
         "code" => self::NOT_FOUND,
         // "title" => "Resource Not Found",
-        "title" => "Error Getting View File",
+        "title" => "Error Getting File",
       ],
       self::FORBIDDEN => [
         "code" => self::FORBIDDEN,

@@ -4,6 +4,7 @@
  * User: Dev_Lee
  * Date: 06/29/2023 - Time: 6:00 AM
  * Updated: 10/03/2023 - Time: 9:30 PM
+ * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
 namespace Devlee\PHPRouter;
@@ -18,11 +19,9 @@ class Request
   private array $bodyData = [];
   private array $queryData = [];
   private array $paramsData = [];
-  public string $ROOT_DIR;
 
-  public function __construct(string $root_dir)
+  public function __construct()
   {
-    $this->ROOT_DIR = $root_dir;
   }
 
   // HAndler MEthods
@@ -39,32 +38,33 @@ class Request
       $path = substr($path, 0, $position);
     }
 
-    $dir = explode('\\', $this->ROOT_DIR);
-    $path = explode('/', $path);
+    // $dir = explode('\\', $this->root_dir);
+    // $path = explode('/', $path);
 
-    $app_path = [];
-    foreach ($path as $key) {
-      if (!in_array($key, $dir)) {
-        $app_path[] = $key;
-      }
-    }
-    return implode('/', $app_path);
+    // $app_path = [];
+    // foreach ($path as $item) {
+    //   if (!in_array($item, $dir)) {
+    //     $app_path[] = $item;
+    //   }
+    // }
+    // return implode('/', $app_path);
+    return $path;
   }
 
   public function isGet()
   {
-    return $this->method() === 'get';
+    return $this->method() === Router::METHOD_GET;
   }
 
   public function isPost()
   {
-    return $this->method() === 'post';
+    return $this->method() === Router::METHOD_POST;
   }
 
   public function method()
   {
     $method = $_SERVER['REQUEST_METHOD'];
-    return strtolower($method);
+    return strtoupper($method);
   }
 
   // PARAMS DATA
@@ -122,6 +122,7 @@ class Request
     return $this->bodyData;
   }
 
+  // TODO:
   private function sanitizeParams(string $value)
   {
     // return filter_input(INPUT_GET, $param, FILTER_SANITIZE_SPECIAL_CHARS);
