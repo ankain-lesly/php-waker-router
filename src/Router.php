@@ -49,6 +49,7 @@ class Router implements RouterInterface
   protected Request $request;
   protected View $view;
 
+  public static ?string $NOT_FOUND_VIEW = null;
 
   private array $routes;
 
@@ -76,13 +77,23 @@ class Router implements RouterInterface
    */
   public static function setLayout(string $layout_directory)
   {
-    return self::$router->view::$LAYOUT_DIR = $layout_directory;
+    return View::setLayoutsDir($layout_directory);
   }
-  public function config(string $views_folder, string $main_layout, string $not_found_view)
+
+  /**
+   * Configure router option
+   * @param $views_dir main name folder where views|templates are located
+   * @param $main_layout main layout of the app if available
+   * @param $not_found_view Your not found page
+   * 
+   * @method confin
+   * @return void
+   */
+  public function config(string $views_dir, string $main_layout, string $not_found_view)
   {
-    $this->view::$VIEWS_DIR = $views_folder;
-    $this->view::$LAYOUT_DIR = $main_layout;
-    $this->view::$NOT_FOUND_VIEW = $not_found_view;
+    $this->view::setViewsDir($views_dir);
+    $this->view::setLayoutsDir($main_layout);
+    self::$NOT_FOUND_VIEW = $not_found_view;
   }
 
   /**
@@ -181,7 +192,7 @@ class Router implements RouterInterface
 
     # Undefined Page Handler
     if ($handler === false) {
-      throw new RouteNotFoundException(View::$NOT_FOUND_VIEW);
+      throw new RouteNotFoundException(self::$NOT_FOUND_VIEW);
     }
 
     # String Handler
@@ -214,7 +225,7 @@ class Router implements RouterInterface
       call_user_func($handler, $this->request, $this->response);
       exit;
     }
-    throw new RouteNotFoundException(View::$NOT_FOUND_VIEW);
+    throw new RouteNotFoundException(self::$NOT_FOUND_VIEW);
   }
 
   /**

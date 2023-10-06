@@ -47,26 +47,42 @@ class Response
 
   /**
    * Display the Content|String|Text|html provided without layout
+   * @param string $title Set current page title
    * @method Mapping Views
    */
-  public function content(string $text_content)
+  public function content(string $text_content, string $title = null)
   {
+    if ($title) {
+      $this->setPageTitle($title);
+    }
     $this->viewHandler->content($text_content);
   }
   /**
    * Display the provided view|template with no layout
+   * @param string $title Set current page title
    * @method Mapping Views
    */
-  public function viewOnly(string $view, array $object_data = [])
+  public function viewOnly(string $view, array $object_data = [], string $title = null)
   {
+    if ($title) {
+      $this->setPageTitle($title);
+    }
     $this->viewHandler->viewOnly($view, $object_data);
   }
   /**
    * Display view|template in layout if available
+   * @param string $title Set current page title
    * @method Mapping Views
    */
-  public function render(string $view, array $object_data = [])
+  public function render(string $view, array $object_data = [], string $title = '')
   {
+    if ($title) {
+      $this->setPageTitle($title);
+    }
     $this->viewHandler->render($view, $object_data);
+  }
+  public function setPageTitle($title)
+  {
+    $this->viewHandler::setPageTitle($title);
   }
 }

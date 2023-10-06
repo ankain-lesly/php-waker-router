@@ -22,10 +22,9 @@ class View
    * @property
    */
   # configs
-  public static ?string $VIEWS_DIR = 'views';
-  public static ?string $LAYOUT_DIR = null;
-  public static ?string $ROOT_DIR = null;
-  public static ?string $NOT_FOUND_VIEW = null;
+  private static ?string $VIEWS_DIR = 'views';
+  private static ?string $LAYOUT_DIR = null;
+  private static ?string $ROOT_DIR = null;
 
   # View page title
   private static string $page_title = "Router: Page title";
@@ -37,6 +36,36 @@ class View
   {
     self::$ROOT_DIR =  $root_directory;
   }
+
+  /**
+   * Display the Content|String|Text|html provided without layout
+   * @method Mapping Views
+   */
+  public static function getViewsDir()
+  {
+    return self::$VIEWS_DIR;
+  }
+  public static function setViewsDir(string $views_dir)
+  {
+    self::$VIEWS_DIR = $views_dir;
+  }
+  public static function getLayoutsDir()
+  {
+    return self::$LAYOUT_DIR;
+  }
+  public static function setLayoutsDir(string $layout_dir)
+  {
+    self::$LAYOUT_DIR = $layout_dir;
+  }
+  public static function getRootDir()
+  {
+    return self::$ROOT_DIR;
+  }
+  public static function setRootDir(string $root_dir)
+  {
+    self::$ROOT_DIR = $root_dir;
+  }
+
 
   /**
    * Display the Content|String|Text|html provided without layout
@@ -119,7 +148,7 @@ class View
 
     $file = self::$LAYOUT_DIR ? self::$LAYOUT_DIR . '/' : '';
 
-    throw new ViewNotFoundException("Layout", $layout_view);
+    throw new ViewNotFoundException("Layout", $file);
   }
 
 
