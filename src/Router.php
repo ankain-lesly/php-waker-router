@@ -25,14 +25,21 @@ class Router implements RouterInterface
    * 
    */
 
-  public const METHOD_HEAD = 'HEAD';
   public const METHOD_GET = 'GET';
   public const METHOD_POST = 'POST';
   public const METHOD_PUT = 'PUT';
   public const METHOD_PATCH = 'PATCH';
   public const METHOD_DELETE = 'DELETE';
-  public const METHOD_PURGE = 'PURGE';
   public const METHOD_OPTIONS = 'OPTIONS';
+
+  /**
+   * Unimplemented requests methods
+   * 
+   * @property
+   * 
+   */
+  public const METHOD_PURGE = 'PURGE';
+  public const METHOD_HEAD = 'HEAD';
   public const METHOD_TRACE = 'TRACE';
   public const METHOD_CONNECT = 'CONNECT';
 
@@ -49,8 +56,6 @@ class Router implements RouterInterface
 
   private static ?string $ROOT_DIR = null;
 
-  public static ?string $NOT_FOUND = null;
-
   public static Router $router;
 
   public function __construct($root_directory)
@@ -61,7 +66,12 @@ class Router implements RouterInterface
     self::$router = $this;
   }
 
-  // Router config setup
+
+  /**
+   * Set page layout for view content
+   * 
+   * @method SetLayout
+   */
   public static function setLayout(string $layout_dir)
   {
     return self::$router->response::$LAYOUT_MAIN = $layout_dir;
@@ -70,7 +80,7 @@ class Router implements RouterInterface
   {
     $this->response::$VIEWS_MAIN = $views_folder;
     $this->response::$LAYOUT_MAIN = $main_layout;
-    self::$NOT_FOUND = $not_found_page;
+    View::$NOT_FOUND = $not_found_page;
   }
 
   /**
@@ -87,12 +97,12 @@ class Router implements RouterInterface
     preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
 
     if (empty($paramMatchesKeys[0])) {
-      $this->registerRoute($method, $path, $handler);
+      $this->routes[$method][$path] = $handler;
     } else {
       $path = $this->routeParamsFactory($path, $paramMatchesKeys[0]);
 
       if ($path) {
-        $this->registerRoute($method, $path, $handler);
+        $this->routes[$method][$path] = $handler;
       }
     }
   }
@@ -120,13 +130,18 @@ class Router implements RouterInterface
 
   public function resolve(): void
   {
+    echo '<pre>';
+    print_r($this->routes);
+    echo '</br>';
+    echo '</pre>';
+    exit();
     $path = $this->request->path();
     $method = $this->request->method();
     $handler = $this->routes[$method][$path] ?? false;
 
     # Undefined Page Handler
     if ($handler === false) {
-      throw new RouteNotFoundException(self::$NOT_FOUND);
+      throw new RouteNotFoundException(View::$NOT_FOUND);
     }
 
     # String Handler
@@ -149,8 +164,6 @@ class Router implements RouterInterface
         if (method_exists($class, $method)) {
 
           # Reset Routes Object
-          // TODO:
-          // $this->routes = null;
           call_user_func($handler, $this->request, $this->response);
         }
       }
@@ -160,9 +173,14 @@ class Router implements RouterInterface
     if (is_callable($handler)) {
       call_user_func([$handler], $this->request, $this->response);
     }
-    throw new RouteNotFoundException(self::$NOT_FOUND);
+    throw new RouteNotFoundException(View::$NOT_FOUND);
   }
 
+  /**
+   * Simply Generate Query Prams
+   * 
+   * @method RouteParamsFactory
+   */
   protected function routeParamsFactory($path, $paramKey)
   {
     $uri = $this->request->path();
@@ -203,7 +221,12 @@ class Router implements RouterInterface
     return implode("/", $path);
   }
 
-
+  /**
+   * This method can only be used when the application does not run on a server
+   * For example running under a sub directory in a host
+   * 
+   * @method interceptRequest
+   */
   public function interceptRequest(?string $path = null): void
   {
     $server_root = str_replace('\\', "/", strtolower($_SERVER['DOCUMENT_ROOT']));
@@ -224,11 +247,5 @@ class Router implements RouterInterface
   public function getResponse()
   {
     return $this->response;
-  }
-
-  // FILE PATH
-  public static function root_folder()
-  {
-    return self::$ROOT_DIR;
   }
 }
