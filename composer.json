@@ -14,10 +14,12 @@
       "email": "leeleslyank@gmail.com",
       "homepage": "https://www.letech-cg.com",
       "role": "Developer"
-    }
+    },
+    {}
   ],
   "minimum-stability": "stable",
   "require": {
-    "psr/http-message": "^2.0"
+    "psr/http-message": "^2.0",
+    "": ""
   }
 }

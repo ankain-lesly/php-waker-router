@@ -9,7 +9,6 @@
 namespace Devlee\PHPRouter;
 
 use Devlee\PHPRouter\Exceptions\RouteNotFoundException;
-use Devlee\PHPRouter\Services\BaseRouter;
 use Devlee\PHPRouter\Services\RouterInterface;
 
 /**
@@ -17,7 +16,7 @@ use Devlee\PHPRouter\Services\RouterInterface;
  * @package  Devlee\PHPRouter\handleErrors
  */
 
-class Router extends BaseRouter implements RouterInterface
+class Router implements RouterInterface
 {
   /**
    * General request methods
