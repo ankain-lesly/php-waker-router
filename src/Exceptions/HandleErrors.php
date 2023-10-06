@@ -15,7 +15,7 @@ namespace Devlee\PHPRouter\Exceptions;
 
 class HandleErrors
 {
-  public static function DisplayErrorMessage(\Throwable $e)
+  public static function DisplayErrorMessage(BaseException $e)
   {
     $message = "<br><b>Title:</b> " . $e->getTitle();
     $message .= "<br><b>Message:</b> " . $e->getMessage();

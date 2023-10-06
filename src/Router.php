@@ -8,27 +8,54 @@
 
 namespace Devlee\PHPRouter;
 
-use Devlee\PHPRouter\Exceptions\RouterException;
+use Devlee\PHPRouter\Exceptions\RouteNotFoundException;
+use Devlee\PHPRouter\Services\BaseRouter;
+use Devlee\PHPRouter\Services\RouterInterface;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
  * @package  Devlee\PHPRouter\handleErrors
  */
 
-class Router
+class Router extends BaseRouter implements RouterInterface
 {
-  // public static string $ROOT_DIR;
-  private array $routes = [];
-  private Request $request;
-  private Response $response;
-  private static ?string $ROOT_DIR = '';
-  public static Router $router;
+  /**
+   * General request methods
+   * 
+   * @property
+   * 
+   */
+
+  public const METHOD_HEAD = 'HEAD';
+  public const METHOD_GET = 'GET';
+  public const METHOD_POST = 'POST';
+  public const METHOD_PUT = 'PUT';
+  public const METHOD_PATCH = 'PATCH';
+  public const METHOD_DELETE = 'DELETE';
+  public const METHOD_PURGE = 'PURGE';
+  public const METHOD_OPTIONS = 'OPTIONS';
+  public const METHOD_TRACE = 'TRACE';
+  public const METHOD_CONNECT = 'CONNECT';
+
+
+  /**
+   * @property
+   * 
+   */
+  protected Response $response;
+  protected Request $request;
+
+
+  private array $routes;
+
+  private static ?string $ROOT_DIR = null;
 
   public static ?string $NOT_FOUND = null;
 
+  public static Router $router;
+
   public function __construct($root_directory)
   {
-    // self::$ROOT_DIR = $root_directory;
     $this->request = new Request($root_directory);
     $this->response = new Response($root_directory);
     self::$ROOT_DIR = $root_directory;
@@ -47,59 +74,98 @@ class Router
     self::$NOT_FOUND = $not_found_page;
   }
 
-  public function get($path, $handler)
+  /**
+   * @param string|array|callable $handler
+   */
+
+  private function registerRoute(string $method, string $path, $handler): void
   {
-    //finding if there is any {?} parameter in $path
+    /**
+     * Searching for URI parameter >>> {param_name} in $path
+     * 
+     */
+
     preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
 
     if (empty($paramMatchesKeys[0])) {
-      return $this->routes['get'][$path] = $handler;
-    }
+      $this->registerRoute($method, $path, $handler);
+    } else {
+      $path = $this->routeParamsFactory($path, $paramMatchesKeys[0]);
 
-    $response = $this->getQueryParams($path, $paramMatchesKeys[0]);
-
-    if ($response) {
-      $this->routes['get'][$response] = $handler;
+      if ($path) {
+        $this->registerRoute($method, $path, $handler);
+      }
     }
   }
 
-  public function post($path, $handler)
+  public function get(string $path, $handler): void
   {
-    //finding if there is any {?} parameter in $path
-    preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
-
-    if (empty($paramMatchesKeys[0])) {
-      return $this->routes['post'][$path] = $handler;
-    }
-
-    $response = $this->getQueryParams($path, $paramMatchesKeys[0]);
-
-    if ($response) {
-      $this->routes['post'][$response] = $handler;
-    }
+    $this->registerRoute(self::METHOD_GET, $path, $handler);
   }
-  public function both($path, $handler)
+
+  public function post(string $path, $handler): void
   {
-    //finding if there is any {?} parameter in $path
-    preg_match_all("/(?<={).+?(?=})/", $path, $paramMatchesKeys);
-
-    if (empty($paramMatchesKeys[0])) {
-      $this->routes['get'][$path] = $handler;
-      return $this->routes['post'][$path] = $handler;
-    }
-
-    $response = $this->getQueryParams($path, $paramMatchesKeys[0]);
-
-    if ($response) {
-      $this->routes['get'][$response] = $handler;
-      $this->routes['post'][$response] = $handler;
-    }
+  }
+  public function both(string $path, $handler): void
+  {
+  }
+  public function delete(string $path, $handler): void
+  {
+  }
+  public function put(string $path, $handler): void
+  {
+  }
+  public function patch(string $path, $handler): void
+  {
   }
 
-  private function getQueryParams(
-    $path,
-    $paramKey
-  ) {
+  public function resolve(): void
+  {
+    $path = $this->request->path();
+    $method = $this->request->method();
+    $handler = $this->routes[$method][$path] ?? false;
+
+    # Undefined Page Handler
+    if ($handler === false) {
+      throw new RouteNotFoundException(self::$NOT_FOUND);
+    }
+
+    # String Handler
+    if (is_string($handler)) {
+
+      if (str_contains($handler, '@')) {
+        $handler = str_replace('@', '', $handler);
+        $this->response->content($handler);
+      }
+
+      $this->response->render($handler);
+    }
+
+    # Array Handler
+    if (is_array($handler)) {
+      [$class, $method] = $handler;
+
+      if (class_exists($class)) {
+        $class = new $class();
+        if (method_exists($class, $method)) {
+
+          # Reset Routes Object
+          // TODO:
+          // $this->routes = null;
+          call_user_func($handler, $this->request, $this->response);
+        }
+      }
+    }
+
+    # Callable Handler
+    if (is_callable($handler)) {
+      call_user_func([$handler], $this->request, $this->response);
+    }
+    throw new RouteNotFoundException(self::$NOT_FOUND);
+  }
+
+  protected function routeParamsFactory($path, $paramKey)
+  {
     $uri = $this->request->path();
     $params = [];
 
@@ -138,44 +204,8 @@ class Router
     return implode("/", $path);
   }
 
-  public function resolve()
-  {
-    $response = $this->response;
-    $path = $this->request->path();
-    $method = $this->request->method();
-    $handler = $this->routes[$method][$path] ?? false;
 
-    # Undefined Page Handler
-    if ($handler === false) {
-
-      if (self::$NOT_FOUND) {
-        $response
-          ->status(404)
-          ->render(Router::$router::$NOT_FOUND);
-      }
-      throw new RouterException('Oops! The page you are trying to access is not available.', 404);
-    }
-
-    # String Handler
-    if (is_string($handler)) {
-
-      if (str_contains($handler, '@')) {
-        $handler = str_replace('@', '', $handler);
-        return $response->content($handler);
-      }
-      return $response->render($handler);
-    }
-
-    # Array Handler
-    if (is_array($handler)) {
-      $handler[0] = new $handler[0]();
-    }
-    # Reset Routes Object
-    $this->routes = [];
-    call_user_func($handler, $this->request, $response);
-  }
-
-  public function interceptRequest($path = null)
+  public function interceptRequest(?string $path = null): void
   {
     $server_root = str_replace('\\', "/", strtolower($_SERVER['DOCUMENT_ROOT']));
     $app_root = str_replace('\\', "/", strtolower(self::$ROOT_DIR));
@@ -191,7 +221,6 @@ class Router
     $route = $route . $path;
     $this->response->redirect($route, 200);
   }
-
   // Get Response
   public function getResponse()
   {

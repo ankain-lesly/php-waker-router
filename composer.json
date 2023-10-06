@@ -11,9 +11,13 @@
   "authors": [
     {
       "name": "Ankain Lesly",
-      "email": "leeleslyank@gmail.com"
+      "email": "leeleslyank@gmail.com",
+      "homepage": "https://www.letech-cg.com",
+      "role": "Developer"
     }
   ],
   "minimum-stability": "stable",
-  "require": {}
+  "require": {
+    "psr/http-message": "^2.0"
+  }
 }

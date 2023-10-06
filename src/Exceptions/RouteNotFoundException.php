@@ -14,12 +14,18 @@ namespace Devlee\PHPRouter\Exceptions;
  * @package  Devlee\PHPRouter\Exceptions\RouterException
  */
 
-class RouterException extends BaseException
+class RouteNotFoundException extends BaseException
 {
-  public function __construct(string $message, int $code = 500)
+  public function __construct(private ?string $view = null)
   {
-    parent::__construct($message, $code);
 
+    parent::__construct('This page is not available', 404);
+
+    echo '<pre>';
+    print_r($this);
+    echo '</br>';
+    echo '</pre>';
+    exit();
     HandleErrors::DisplayErrorMessage($this);
   }
 }
