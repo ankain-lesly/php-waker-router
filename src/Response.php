@@ -9,13 +9,18 @@
 
 namespace Devlee\PHPRouter;
 
+use Devlee\PHPRouter\Services\TemplatesTrait;
+
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\handleErrors
+ * @package  php-router-core
  */
 
 class Response
 {
+  // Templates Routine
+  use TemplatesTrait;
+
   /**
    * @param View View Handler
    */
@@ -32,9 +37,8 @@ class Response
     header("Refresh: $time_seconds; url=$url");
     exit;
   }
-  public function redirect(string $url, ?int $status_code = null)
+  public function redirect(string $url, int $code = 301)
   {
-    $code = $status_code ?? 301;
     $this->status($code);
     header("Location: $url");
     exit;
@@ -43,46 +47,5 @@ class Response
   public function json(array $data)
   {
     exit(json_encode($data));
-  }
-
-  /**
-   * Display the Content|String|Text|html provided without layout
-   * @param string $title Set current page title
-   * @method Mapping Views
-   */
-  public function content(string $text_content, string $title = null)
-  {
-    if ($title) {
-      $this->setPageTitle($title);
-    }
-    $this->viewHandler->content($text_content);
-  }
-  /**
-   * Display the provided view|template with no layout
-   * @param string $title Set current page title
-   * @method Mapping Views
-   */
-  public function viewOnly(string $view, array $object_data = [], string $title = null)
-  {
-    if ($title) {
-      $this->setPageTitle($title);
-    }
-    $this->viewHandler->viewOnly($view, $object_data);
-  }
-  /**
-   * Display view|template in layout if available
-   * @param string $title Set current page title
-   * @method Mapping Views
-   */
-  public function render(string $view, array $object_data = [], string $title = '')
-  {
-    if ($title) {
-      $this->setPageTitle($title);
-    }
-    $this->viewHandler->render($view, $object_data);
-  }
-  public function setPageTitle($title)
-  {
-    $this->viewHandler::setPageTitle($title);
   }
 }

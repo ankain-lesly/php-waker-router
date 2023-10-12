@@ -13,10 +13,10 @@ use Devlee\PHPRouter\Router;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\Exceptions\RouterException
+ * @package  php-router-core
  */
 
-class RouteNotFoundException extends BaseException
+class RouteNotFoundException extends RouterBaseException
 {
   public function __construct(private ?string $view = null)
   {

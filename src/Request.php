@@ -11,7 +11,7 @@ namespace Devlee\PHPRouter;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\handleErrors
+ * @package  php-router-core
  */
 
 class Request
@@ -53,12 +53,12 @@ class Request
 
   public function isGet()
   {
-    return $this->method() === Router::METHOD_GET;
+    return $this->method() === 'GET';
   }
 
   public function isPost()
   {
-    return $this->method() === Router::METHOD_POST;
+    return $this->method() === 'POST';
   }
 
   public function method()

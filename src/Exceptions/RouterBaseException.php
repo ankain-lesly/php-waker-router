@@ -12,10 +12,10 @@ namespace Devlee\PHPRouter\Exceptions;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\Exceptions\RouterException
+ * @package  php-router-core
  */
 
-abstract class BaseException extends \Exception
+abstract class RouterBaseException extends \Exception
 {
   private const VALIDATION_ERROR = 400;
   private const UNAUTHORIZED = 401;
@@ -65,7 +65,7 @@ abstract class BaseException extends \Exception
       ],
     );
 
-    return $statusObjectErrors[$code]['title'] ?? "Unknown Request";
+    return $statusObjectErrors[$code]['title'] ?? "Router Error";
   }
 
   public function getTitle()

@@ -11,10 +11,10 @@ namespace Devlee\PHPRouter\Exceptions;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\Exceptions\RouterException
+ * @package  php-router-core
  */
 
-class ViewNotFoundException extends BaseException
+class ViewNotFoundException extends RouterBaseException
 {
   public function __construct(string $view_type, string $filename,)
   {

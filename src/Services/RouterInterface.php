@@ -7,9 +7,11 @@
 
 namespace Devlee\PHPRouter\Services;
 
+use Devlee\PHPRouter\Router;
+
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\handleErrors
+ * @package  php-router-core
  */
 
 
@@ -22,7 +24,8 @@ interface RouterInterface
   public function put(string $path, $handler): void;
   public function patch(string $path, $handler): void;
 
-  public function useRoutes(array $customRoutes): void;
+  public function addRoutes(array $customRoutes): void;
+  public static function useRoute(): Router;
 
   public function resolve(): void;
 }

@@ -17,7 +17,5 @@
     }
   ],
   "minimum-stability": "stable",
-  "require": {
-    "psr/http-message": "^2.0"
-  }
+  "require": {}
 }

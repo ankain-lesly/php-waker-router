@@ -14,7 +14,7 @@ use Devlee\PHPRouter\Services\RouterInterface;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\handleErrors
+ * @package  php-router-core
  */
 
 class Router implements RouterInterface
@@ -22,51 +22,46 @@ class Router implements RouterInterface
   /**
    * General request methods
    * 
-   * @property
-   * 
    */
 
-  public const METHOD_GET = 'GET';
-  public const METHOD_POST = 'POST';
-  public const METHOD_PUT = 'PUT';
-  public const METHOD_PATCH = 'PATCH';
-  public const METHOD_DELETE = 'DELETE';
-  public const METHOD_OPTIONS = 'OPTIONS';
-  /**
-   * @property
-   */
-  public const METHOD_PURGE = 'PURGE';
-  public const METHOD_HEAD = 'HEAD';
-  public const METHOD_TRACE = 'TRACE';
-  public const METHOD_CONNECT = 'CONNECT';
+  private const METHOD_GET = 'GET';
+  private const METHOD_POST = 'POST';
+  private const METHOD_PUT = 'PUT';
+  private const METHOD_PATCH = 'PATCH';
+  private const METHOD_DELETE = 'DELETE';
+
+  private const METHOD_OPTIONS = 'OPTIONS';
+
+  private const METHOD_PURGE = 'PURGE';
+  private const METHOD_HEAD = 'HEAD';
+  private const METHOD_TRACE = 'TRACE';
+  private const METHOD_CONNECT = 'CONNECT';
 
 
   /**
    * @property
-   * 
    */
   protected Response $response;
   protected Request $request;
   protected View $view;
 
-  public static ?string $NOT_FOUND_VIEW = null;
+  private static ?string $NOT_FOUND_VIEW = null;
+  private static ?string $ROOT_PATH = null;
 
   private array $routes;
-
-  private static ?string $ROOT_DIR = null;
 
   public static Router $router;
 
   /**
-   * @param string $root_directory: main app directory
+   * @param string $root_path: main app directory
    */
-  public function __construct($root_directory)
+  public function __construct($root_path)
   {
-    $this->request = new Request($root_directory);
-    $this->view = new View($root_directory);
+    $this->request = new Request($root_path);
+    $this->view = new View($root_path);
     $this->response = new Response($this->view);
 
-    self::$ROOT_DIR = $root_directory;
+    self::$ROOT_PATH = $root_path;
     self::$router = $this;
   }
 
@@ -86,12 +81,11 @@ class Router implements RouterInterface
    * @param $main_layout main layout of the app if available
    * @param $not_found_view Your not found page
    * 
-   * @method confin
+   * @method config
    * @return void
    */
-  public function config(string $views_dir, string $main_layout, string $not_found_view)
+  public function config(string $main_layout, string $not_found_view)
   {
-    $this->view::setViewsDir($views_dir);
     $this->view::setLayoutsDir($main_layout);
     self::$NOT_FOUND_VIEW = $not_found_view;
   }
@@ -167,10 +161,11 @@ class Router implements RouterInterface
   }
 
   /**
-   * Register Custom router
-   * @param callable[]  customRoutes
+   * Register a collection of routes
+   * @param array<callable, mixed> customRoutes
+   * @method addRoutes
    */
-  public function useRoutes(array $customRoutes): void
+  public function addRoutes(array $customRoutes): void
   {
     foreach ($customRoutes as $route) {
       if (is_callable($route)) {
@@ -178,8 +173,19 @@ class Router implements RouterInterface
       }
     }
   }
+
   /**
-   * @method Resolve Routes
+   * Register a route
+   * @param array<callable, mixed> customRoutes
+   * @method useRoute
+   */
+  public static function useRoute(): self
+  {
+    return self::$router;
+  }
+  /**
+   * Execute  Routes
+   * @method resolve
    */
   public function resolve(): void
   {
@@ -272,7 +278,6 @@ class Router implements RouterInterface
     $this->request->setParams($params);
     return implode("/", $path);
   }
-
   /**
    * This method can only be used when the application does not run on a server
    * For example running under a sub directory in a host
@@ -282,7 +287,7 @@ class Router implements RouterInterface
   public function interceptRequest(?string $path = null): void
   {
     $server_root = str_replace('\\', "/", strtolower($_SERVER['DOCUMENT_ROOT']));
-    $app_root = str_replace('\\', "/", strtolower(self::$ROOT_DIR));
+    $app_root = str_replace('\\', "/", strtolower(self::$ROOT_PATH));
 
     $route = str_replace($server_root, '', $app_root);
 
@@ -299,5 +304,20 @@ class Router implements RouterInterface
   public function getResponse()
   {
     return $this->response;
+  }
+
+  public static function __callStatic($name, $args)
+  {
+    if (method_exists(self::$router, $name)) {
+      self::$router->$name(...$args);
+    } else {
+      $message = "<br /> <b>Router Error</b>";
+      $message .= "<br /> Unknown Router modifier <b>$name</b>";
+      die($message);
+    }
+    /**
+     * AddRoute     >>> Add Static Route
+     * GroupRoutes  >>> Group Routes statically
+     */
   }
 }

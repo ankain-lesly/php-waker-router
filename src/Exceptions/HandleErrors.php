@@ -12,12 +12,12 @@ namespace Devlee\PHPRouter\Exceptions;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  Devlee\PHPRouter\Exceptions\HandleErrors
+ * @package  php-router-core
  */
 
 class HandleErrors
 {
-  public static function DisplayErrorMessage(BaseException $e)
+  public static function DisplayErrorMessage(RouterBaseException $e)
   {
     http_response_code($e->getCode());
 
