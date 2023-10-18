@@ -193,9 +193,6 @@ class Router implements RouterInterface
     $method = $this->request->method();
     $handler = $this->routes[$method][$path] ?? false;
 
-    echo '</br>';
-    // echo '</pre>';
-
     # Undefined Page Handler
     if ($handler === false) {
       throw new RouteNotFoundException(self::$NOT_FOUND_VIEW);
@@ -205,25 +202,21 @@ class Router implements RouterInterface
     if (is_string($handler)) {
 
       if (str_contains($handler, '@')) {
-        $handler = str_replace('@', '', $handler);
-        $this->response->content($handler);
+        $view = str_replace('@', '', $handler);
+        $this->response->render($view);
       }
 
-      $this->response->render($handler);
+      $this->response->content($handler);
     }
 
-    # Array Handler
+    # Array Handler 
     if (is_array($handler)) {
       [$class, $method] = $handler;
 
-      if (class_exists($class)) {
-        $class = new $class();
-        if (method_exists($class, $method)) {
-          # Reset Routes Object
-          call_user_func([$class, $method], $this->request, $this->response);
-          exit;
-        }
-      }
+      $class = new $class();
+      # Reset Routes Object
+      call_user_func([$class, $method], $this->request, $this->response);
+      exit;
     }
 
     # Callable Handler
