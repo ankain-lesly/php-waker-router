@@ -7,11 +7,11 @@
  * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter\Services;
+namespace Devlee\WakerRouter\Services;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
 trait TemplatesTrait
@@ -20,57 +20,51 @@ trait TemplatesTrait
   /**
    * Display the Content|String|Text|html provided without layout
    * @method content
-   * @param string $text Text to render on page
-   * @param string $title Page title
+   * @param string $content Content to render on page
+   * @param string $page_title Set the title of the page
    * @return null
    */
-  public function content(string $text, string $title = null)
+  public function content(string $content, string $page_title = null)
   {
-    if ($title) {
-      $this->setPageTitle($title);
+    if ($page_title) {
+      $this->setPageTitle($page_title);
     }
-    $this->viewHandler->content($text);
+    $this->viewHandler->content($content);
   }
   /**
    * Load a view template
    * @method load
-   * @param string $view Template view to render
-   * @param string $title Page title
-   * @param array $context Data to be parsed to view
+   * @param string $view Template|view name to be rendered
+   * @param string $page_title Set the title of the page
+   * @param array $context An array|object of data to be parsed to the view
    * @return null
    */
-  public function load(string $view, array $context = [], string $title = null)
+  public function load(string $view, string $page_title = null, array $context = [])
   {
-    if ($title) {
-      $this->setPageTitle($title);
-    }
-    $this->viewHandler->load($view, $context);
+    $this->viewHandler->load($view, $page_title, $context);
   }
 
   /**
    * Load a view|template within a main layout if available
    * @method render
-   * @param string $view Template view to render
-   * @param string $title Page title
-   * @param array $context Data to be parsed to view
+   * @param string $view Template|view name to be rendered
+   * @param string $page_title Set the title of the page
+   * @param array $context An array|object of data to be parsed to the view
    * @return null
    */
-  public function render(string $view, array $context = [], ?string $title = null)
+  public function render(string $view, ?string $page_title = null, array $context = [])
   {
-    if ($title) {
-      $this->setPageTitle($title);
-    }
-    $this->viewHandler->render($view, $context);
+    $this->viewHandler->render($view, $page_title, $context);
   }
 
   /**
    * Set current page title
    * @method setPageTitle
-   * @param string $title Page title
+   * @param string $page_title Set the title of the page
    * @return null
    */
-  public function setPageTitle($title)
+  public function setPageTitle($page_title)
   {
-    $this->viewHandler::setPageTitle($title);
+    $this->viewHandler::setPageTitle($page_title);
   }
 }

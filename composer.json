@@ -1,21 +1,27 @@
 {
-  "name": "devlee/php-router",
-  "description": "Create a Fast, secure, efficient and support multiple and amazing features PHP routing package",
+  "name": "devlee/waker-router",
+  "description": "A Fast, secure, efficient and simple PHP router package",
   "type": "library",
-  "license": "MIT",
+  "keywords": [
+    "router",
+    "response request",
+    "views"
+  ],
   "autoload": {
     "psr-4": {
-      "Devlee\\PHPRouter\\": "src/"
+      "Devlee\\WakerRouter\\": "src/"
     }
   },
   "authors": [
     {
       "name": "Ankain Lesly",
       "email": "leeleslyank@gmail.com",
-      "homepage": "https://www.letech-cg.com",
-      "role": "Developer"
+      "role": "Project Founder",
+      "homepage": "https://www.letech-cg.com"
     }
   ],
-  "minimum-stability": "stable",
+  "homepage": "",
+  "license": "MIT",
+  "minimum-stability": "dev",
   "require": {}
 }

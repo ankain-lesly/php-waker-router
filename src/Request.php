@@ -7,11 +7,11 @@
  * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter;
+namespace Devlee\WakerRouter;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
 class Request
@@ -38,16 +38,6 @@ class Request
       $path = substr($path, 0, $position);
     }
 
-    // $dir = explode('\\', $this->root_dir);
-    // $path = explode('/', $path);
-
-    // $app_path = [];
-    // foreach ($path as $item) {
-    //   if (!in_array($item, $dir)) {
-    //     $app_path[] = $item;
-    //   }
-    // }
-    // return implode('/', $app_path);
     return $path;
   }
 
@@ -126,9 +116,9 @@ class Request
   private function sanitizeParams(string $value)
   {
     // return filter_input(INPUT_GET, $param, FILTER_SANITIZE_SPECIAL_CHARS);
-    $value = htmlspecialchars($value);
-    $value = strip_tags($value);
-    $value = trim($value);
+    // $value = htmlspecialchars($value);
+    // $value = strip_tags($value);
+    // $value = trim($value);
     return $value;
   }
 }

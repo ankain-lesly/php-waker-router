@@ -7,48 +7,41 @@
  * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter;
+namespace Devlee\WakerRouter;
 
-use Devlee\PHPRouter\Exceptions\ViewNotFoundException;
-use Wakeable\App\Runner;
+use Devlee\WakerRouter\Exceptions\TemplateEnginException;
+use Devlee\WakerRouter\Exceptions\ViewNotFoundException;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
 class View
 {
   /**
+   *  Template Engine
+   */
+  private ?object $engine = null;
+
+  /**
    *  configs
    */
-  private static string $VIEWS_PATH;
+  private static string $views_path;
   private static ?string $LAYOUT_DIR = null;
   // private static ?string $ROOT_PATH = null;
 
   # page title
   private static string $page_title = "Router: Page title";
 
-  public function __construct(string $root_path)
+  public function __construct(string $views_path)
   {
-    // self::$ROOT_PATH =  $root_path;
-    self::$VIEWS_PATH = VIEWS_PATH;
+    self::$views_path = $views_path;
   }
 
   /**
-   * Display the Content|String|Text|html provided without layout
-   * @method Mapping Views
+   * Working with layout Dir get|set
    */
-
-  // public static function getViewsDir()
-  // {
-  //   return self::$VIEWS_DIR;
-  // }
-  // public static function setViewsDir(string $views_dir)
-  // {
-  //   self::$VIEWS_DIR = $views_dir;
-  // }
-
   public static function getLayoutsDir()
   {
     return self::$LAYOUT_DIR;
@@ -58,48 +51,36 @@ class View
     self::$LAYOUT_DIR = $layout_dir;
   }
 
-  // public static function getRootDir()
-  // {
-  //   return self::$ROOT_PATH;
-  // }
-  // public static function setRootDir(string $root_path)
-  // {
-  //   self::$ROOT_PATH = $root_path;
-  // }
-
   /**
    * Display the Content|String|Text|html provided without layout
    * @method content
-   * @param string $text Text to render on page
-   * @param string $title Page title
+   * @param string $content Text to render on page
+   * @param string $page_title Set the title of the page
    * @return null
    */
-  public function content(string $text_content, ?string $title = null)
+  public function content(string $content, ?string $page_title = null)
   {
-    if ($title) {
-      $this->setPageTitle($title);
+    if ($page_title) {
+      $this->setPageTitle($page_title);
     }
-    $view = $text_content;
-    $layout = $this->getLayoutContent();
-    if ($layout) {
-      $page = str_replace("{{content}}", $view, $layout);
-      exit($page);
-    }
-    exit($view);
+    $view = $content;
+    $pageContent = $this->getLayoutContent($view);
+
+    exit($pageContent);
   }
 
   /**
    * Load a view template
    * @method load
-   * @param string $view Template view to render
-   * @param string $title Page title
-   * @param array $context Data to be parsed to view
+   * @param string $view Template|view name to be rendered
+   * @param string $page_title Set the title of the page
+   * @param array $context An array|object of data to be parsed to the view
    * @return null
    */
-  public function load(string $view, $context = [], ?string $title = null)
+  public function load(string $view, ?string $page_title = null, array $context = [])
   {
-    if ($title) {
-      $this->setPageTitle($title);
+    if ($page_title) {
+      $this->setPageTitle($page_title);
     }
     $view = $this->getViewContent($view, $context);
     exit($view);
@@ -108,38 +89,30 @@ class View
   /**
    * Load a view|template within a main layout if available
    * @method render
-   * @param string $view Template view to render
-   * @param string $title Page title
-   * @param array $context Data to be parsed to view
+   * @param string $view Template|view name to be rendered
+   * @param string $page_title Set the title of the page
+   * @param array $context An array|object of data to be parsed to the view
    * @return null
    */
-  public function render(string $view, array $context = [], ?string $title = null)
+  public function render(string $view, ?string $page_title = null, array $context = [])
   {
-    if ($title) {
-      $this->setPageTitle($title);
+    if ($page_title) {
+      $this->setPageTitle($page_title);
     }
     # Load Data into view
     $view = $this->getViewContent($view, $context);
+    $pageContent = $this->getLayoutContent($view);
 
-    $layout = $this->getLayoutContent();
-    if ($layout) {
-      $page = str_replace("{{content}}", $view, $layout);
-      exit($page);
-    }
-    exit($view);
+    exit($pageContent);
   }
 
   /**
-   * @method
    * Load a view content
+   * @method getViewContent
    */
   private function getViewContent(string $view, $params = [])
   {
-    $file = self::$VIEWS_PATH . '/' . $view;
-
-    // if (self::$VIEWS_DIR) {
-    //   $file = self::$ROOT_PATH . '/../' . self::$VIEWS_DIR . '/' . $view;
-    // }
+    $file = self::$views_path . '/' . $view;
 
     # > Generating Twig Template View Files
     if (file_exists($file . ".twig"))
@@ -156,35 +129,42 @@ class View
   }
 
   /**
-   * @method getLayoutContent
    * Load layout content
+   * @method getLayoutContent
    * @return null
    */
-  private function getLayoutContent()
+  private function getLayoutContent($view)
   {
     $layout_view = self::$LAYOUT_DIR;
 
-    if (!$layout_view) return false;
+    if (!$layout_view) return $view;
+    $pageContent = "";
 
-    $file = self::$VIEWS_PATH . '/' . $layout_view;
+    $file = self::$views_path . '/' . $layout_view;
 
     if (file_exists($file . ".php"))
-      return self::loadViewTemplate($file . ".php");
+      $pageContent = self::loadViewTemplate($file . ".php");
     elseif (file_exists($file . ".html"))
-      return self::loadViewTemplate($file . ".html");
+      $pageContent = self::loadViewTemplate($file . ".html");
+    else {
+      throw new ViewNotFoundException("Layout", $file);
+    }
 
-    $file = self::$LAYOUT_DIR ? self::$LAYOUT_DIR . '/' : '';
-
-    throw new ViewNotFoundException("Layout", $file);
+    $pageContent = str_replace("{{content}}", $view, $pageContent);
+    $pageContent = str_replace("{{page_title}}", $this->getPageTitle(), $pageContent);
+    return $pageContent;
   }
 
   /**
    * @method LoadTwigTemplate
    * Load a twig template
    */
-  private static function LoadTwigTemplate(string $view_file, array $params = [])
+  private function LoadTwigTemplate(string $view_file, array $params = [])
   {
-    return Runner::$app->twig->render($view_file, $params);
+    if (!$this->engine)
+      throw new TemplateEnginException('Error loading template engine to render application templates...');
+
+    return $this->engine->render($view_file, $params);
   }
 
   /**
@@ -223,5 +203,13 @@ class View
   public static function getPageTitle()
   {
     return self::$page_title;
+  }
+
+  /**
+   * Set Template Engine
+   */
+  public function setEngine(object $engine)
+  {
+    $this->engine = $engine;
   }
 }

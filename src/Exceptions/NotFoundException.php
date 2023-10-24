@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * User: Dev_Lee
+ * Date: 06/29/2023 - Time: 6:00 AM
+ * Updated: 10/03/2023 - Time: 9:30 PM
+ * Updated: 10/06/2023 - Time: 10:00 AM
+ */
+
+namespace Devlee\WakerRouter\Exceptions;
+
+/**
+ * @author  Ankain Lesly <leeleslyank@gmail.com>
+ * @package  Waker-router
+ */
+
+class NotFoundException extends _RouterBaseException
+{
+  public function __construct()
+  {
+    parent::__construct('Oops! The page you are trying to access does not exists.', 'Page Not Found - 404', 404);
+
+    HandleRouterExceptions::setup($this);
+  }
+}

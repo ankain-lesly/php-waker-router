@@ -7,24 +7,39 @@
  * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter\Exceptions;
+namespace Devlee\WakerRouter\Exceptions;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
-class ViewNotFoundException extends RouterBaseException
+class ViewNotFoundException extends _RouterBaseException
 {
-  public function __construct(string $view_type, string $filename,)
+  public function __construct(string $view_type, string $filename)
   {
+    $title = 'Error Getting View file';
 
-    $filename = str_replace('/', '\\', $filename);
-    $message = 'Oops! we encountered an error loading your ' . $view_type . ' file. ';
-    $message .= "<mark><b> $filename.php </b></mark>, <b>html.</b> Check if it exist in your directory and try again!";
+    if (strtolower($view_type) !== 'view') {
+      $title = 'Error Getting Layout file';
+    }
 
-    parent::__construct($message, 404);
+    $message = 'Oops! We encountered an error loading your ' . $view_type . ' file. ';
+    $message .= " Check if it exist in your directory and try again!";
 
-    HandleErrors::DisplayErrorMessage($this);
+    parent::__construct($message, $title, 404);
+
+    $filename = str_replace('/', '\\', $filename) . ".php | .html | .twig";
+    $filename = explode('\..\\', $filename);
+
+    $context = array(
+      'view' => end($filename) . ' not found',
+    );
+    if (!str_contains($this->getTrace()[2]['file'] ?? 'No file', 'devlee')) {
+      $context['file'] = $this->getTrace()[2]['file'] ?? 'No file';
+      $context['line'] = $this->getTrace()[2]['line'] ?? 'No Line';
+    }
+
+    HandleRouterExceptions::setup($this, $context);
   }
 }

@@ -7,14 +7,15 @@
  * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter;
+namespace Devlee\WakerRouter;
 
-use Devlee\PHPRouter\Exceptions\RouteNotFoundException;
-use Devlee\PHPRouter\Services\RouterInterface;
+use Devlee\WakerRouter\Exceptions\NotFoundException;
+use Devlee\WakerRouter\Exceptions\RegularException;
+use Devlee\WakerRouter\Services\RouterInterface;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
 class Router implements RouterInterface
@@ -46,22 +47,22 @@ class Router implements RouterInterface
   protected View $view;
 
   private static ?string $NOT_FOUND_VIEW = null;
-  private static ?string $ROOT_PATH = null;
+  // private static ?string $views_dir = null;
 
   private array $routes;
 
   public static Router $router;
 
   /**
-   * @param string $root_path: main app directory
+   * @param string $views_dir: main app directory
    */
-  public function __construct($root_path)
+  public function __construct(string $views_dir)
   {
-    $this->request = new Request($root_path);
-    $this->view = new View($root_path);
+    $this->request = new Request();
+    $this->view = new View($views_dir);
     $this->response = new Response($this->view);
 
-    self::$ROOT_PATH = $root_path;
+    // self::$views_dir = $views_dir;
     self::$router = $this;
   }
 
@@ -70,21 +71,18 @@ class Router implements RouterInterface
    * 
    * @method SetLayout
    */
-  public static function setLayout(string $layout_directory)
+  public static function setLayout(string $layout)
   {
-    return View::setLayoutsDir($layout_directory);
+    return View::setLayoutsDir($layout);
   }
 
   /**
-   * Configure router option
-   * @param $views_dir main name folder where views|templates are located
-   * @param $main_layout main layout of the app if available
-   * @param $not_found_view Your not found page
+   * Configure router option and views
    * 
-   * @method config
-   * @return void
+   * @param string $main_layout Add a site layout view|template if available >> MainLayout
+   * @param string $not_found_view Your not found page >> 404
    */
-  public function config(string $main_layout, string $not_found_view)
+  public function config(string $main_layout, string $not_found_view = null)
   {
     $this->view::setLayoutsDir($main_layout);
     self::$NOT_FOUND_VIEW = $not_found_view;
@@ -193,11 +191,6 @@ class Router implements RouterInterface
     $method = $this->request->method();
     $handler = $this->routes[$method][$path] ?? false;
 
-    # Undefined Page Handler
-    if ($handler === false) {
-      throw new RouteNotFoundException(self::$NOT_FOUND_VIEW);
-    }
-
     # String Handler
     if (is_string($handler)) {
 
@@ -213,8 +206,12 @@ class Router implements RouterInterface
     if (is_array($handler)) {
       [$class, $method] = $handler;
 
+      if (!class_exists($class)) {
+        throw new RegularException('Object Class Not Found in your Application: ' . "<mark>$class</mark>");
+      } elseif (!method_exists($class, $method))
+        throw new RegularException("Method: <mark>$method</mark> does not exist in " . "<mark>$class</mark>");
+
       $class = new $class();
-      # Reset Routes Object
       call_user_func([$class, $method], $this->request, $this->response);
       exit;
     }
@@ -224,7 +221,15 @@ class Router implements RouterInterface
       call_user_func($handler, $this->request, $this->response);
       exit;
     }
-    throw new RouteNotFoundException(self::$NOT_FOUND_VIEW);
+
+    # FallBack Not FOund page Handler
+
+    if (self::$NOT_FOUND_VIEW) {
+      # Rendering a Not Found View
+      $this->view->render(self::$NOT_FOUND_VIEW, "Page Not Found");
+    }
+    # Throwing an Error
+    throw new NotFoundException();
   }
 
   /**
@@ -271,28 +276,7 @@ class Router implements RouterInterface
     $this->request->setParams($params);
     return implode("/", $path);
   }
-  /**
-   * This method can only be used when the application does not run on a server
-   * For example running under a sub directory in a host
-   * 
-   * @method interceptRequest
-   */
-  public function interceptRequest(?string $path = null): void
-  {
-    $server_root = str_replace('\\', "/", strtolower($_SERVER['DOCUMENT_ROOT']));
-    $app_root = str_replace('\\', "/", strtolower(self::$ROOT_PATH));
 
-    $route = str_replace($server_root, '', $app_root);
-
-    $path = $path ?? $this->request->path();
-
-    if (!str_contains($path, '_/')) return;
-    $path = explode('_/', $path);
-    $path = '/' . end($path);
-
-    $route = $route . $path;
-    $this->response->redirect($route, 200);
-  }
   // Get Response
   public function getResponse()
   {
@@ -308,9 +292,13 @@ class Router implements RouterInterface
       $message .= "<br /> Unknown Router modifier <b>$name</b>";
       die($message);
     }
-    /**
-     * AddRoute     >>> Add Static Route
-     * GroupRoutes  >>> Group Routes statically
-     */
+  }
+
+  /**
+   * Set a Template Engine
+   */
+  public function setTemplateEngine(object $engine)
+  {
+    $this->view->setEngine($engine);
   }
 }

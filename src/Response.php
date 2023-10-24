@@ -7,13 +7,13 @@
  * Updated: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter;
+namespace Devlee\WakerRouter;
 
-use Devlee\PHPRouter\Services\TemplatesTrait;
+use Devlee\WakerRouter\Services\TemplatesTrait;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
 class Response

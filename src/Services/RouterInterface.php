@@ -5,13 +5,13 @@
  * Date: 10/06/2023 - Time: 10:00 AM
  */
 
-namespace Devlee\PHPRouter\Services;
+namespace Devlee\WakerRouter\Services;
 
-use Devlee\PHPRouter\Router;
+use Devlee\WakerRouter\Router;
 
 /**
  * @author  Ankain Lesly <leeleslyank@gmail.com>
- * @package  php-router-core
+ * @package  Waker-router
  */
 
 
