@@ -1,7 +1,2 @@
 vendor/
 .vscode/
-app/
-views/
-routes/
-config/
-CHANGES.md
