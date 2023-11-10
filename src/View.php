@@ -64,7 +64,7 @@ class View
       $this->setPageTitle($page_title);
     }
     $view = $content;
-    $pageContent = $this->getLayoutContent($view);
+    $pageContent = $this->getLayoutContent($view, []);
 
     exit($pageContent);
   }
@@ -101,7 +101,7 @@ class View
     }
     # Load Data into view
     $view = $this->getViewContent($view, $context);
-    $pageContent = $this->getLayoutContent($view);
+    $pageContent = $this->getLayoutContent($view, $context);
 
     exit($pageContent);
   }
@@ -110,20 +110,20 @@ class View
    * Load a view content
    * @method getViewContent
    */
-  private function getViewContent(string $view, $params = [])
+  private function getViewContent(string $view, $context = [])
   {
     $file = self::$views_path . '/' . $view;
 
     # > Generating Twig Template View Files
     if (file_exists($file . ".twig"))
-      return self::LoadTwigTemplate($view . '.twig', $params);
+      return self::LoadTwigTemplate($view . '.twig', $context);
 
     if (file_exists($file . ".php"))
-      return self::loadViewTemplate($file . ".php", $params);
+      return self::loadViewTemplate($file . ".php", $context);
     elseif (file_exists($file . ".html"))
-      return self::loadViewTemplate($file . ".html", $params);
+      return self::loadViewTemplate($file . ".html", $context);
     elseif (file_exists($file))
-      return self::loadViewTemplate($file, $params);
+      return self::loadViewTemplate($file, $context);
 
     throw new ViewNotFoundException("View", $file);
   }
@@ -133,7 +133,7 @@ class View
    * @method getLayoutContent
    * @return null
    */
-  private function getLayoutContent($view)
+  private function getLayoutContent($view, $context)
   {
     $layout_view = self::$LAYOUT_DIR;
 
@@ -143,9 +143,9 @@ class View
     $file = self::$views_path . '/' . $layout_view;
 
     if (file_exists($file . ".php"))
-      $pageContent = self::loadViewTemplate($file . ".php");
+      $pageContent = self::loadViewTemplate($file . ".php", $context);
     elseif (file_exists($file . ".html"))
-      $pageContent = self::loadViewTemplate($file . ".html");
+      $pageContent = self::loadViewTemplate($file . ".html", $context);
     else {
       throw new ViewNotFoundException("Layout", $file);
     }

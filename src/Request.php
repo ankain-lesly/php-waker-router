@@ -113,12 +113,33 @@ class Request
   }
 
   // TODO:
-  private function sanitizeParams(string $value)
+  private function sanitizeParams($value)
   {
     // return filter_input(INPUT_GET, $param, FILTER_SANITIZE_SPECIAL_CHARS);
     // $value = htmlspecialchars($value);
     // $value = strip_tags($value);
     // $value = trim($value);
+    if (is_string($value)) {
+      return $value;
+    }
+    return $value;
+  }
+
+  /**
+   * Filter a given string and remove HTML Exec Characters
+   * @method filterString
+   * 
+   * @param string $value
+   */
+  public function filterString($value)
+  {
+    if (is_string($value)) {
+      $value = htmlspecialchars($value);
+      $value = strip_tags($value);
+      $value = trim($value);
+      return $value;
+    }
+
     return $value;
   }
 }
