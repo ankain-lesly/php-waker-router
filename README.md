@@ -1,8 +1,17 @@
 # PHP Waker Router
 
 A Fast, secure and efficient PHP router package. Supports multiple and amazing routing features to handle your app.
+Installable via composer a PHP package manager
 
 ## Introduction
+
+Installation
+
+```shell
+composer require devlee/waker-router
+```
+
+Setup References
 
 - Router
 
